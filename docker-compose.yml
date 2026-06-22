@@ -4,6 +4,8 @@ services:
   api:
     build: .
     command: ["migrate", "npm", "start"]
+    ports:
+      - "4050:4050"
     volumes:
       - ./uploads:/app/uploads
       - ./data:/app/data
@@ -27,37 +29,13 @@ services:
   sqlite-web:
     image: coleifer/sqlite-web
     entrypoint: ["sqlite_web", "--host", "0.0.0.0", "--port", "8080", "/data/sqlite.db"]
+    ports:
+      - "8080:8080"
     volumes:
       - ./data:/data
     restart: unless-stopped
     networks:
       - app
-
-  caddy:
-    # image: caddy:2-alpine
-    build:
-      context: .
-      dockerfile: Dockerfile.caddy
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      # - "80:80"
-      - "443:443"
-      - "443:443/udp"
-      - "4001:4001"
-      - "3001:3001"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./uploads:/app/uploads
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - app
-
-volumes:
-  caddy_data:
-  caddy_config:
 
 networks:
   app:
