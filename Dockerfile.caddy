@@ -1,0 +1,10 @@
+# Use the builder image to compile Caddy with the Cloudflare plugin
+FROM caddy:builder AS builder
+
+RUN xcaddy build \
+    --with github.com/caddy-dns/cloudflare
+
+# Copy the custom binary into the standard runtime image
+FROM caddy:latest
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy

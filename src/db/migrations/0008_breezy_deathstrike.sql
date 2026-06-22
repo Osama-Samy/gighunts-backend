@@ -1,0 +1,1 @@
+ALTER TABLE `user_cvs` ADD `coach_feedback` text;

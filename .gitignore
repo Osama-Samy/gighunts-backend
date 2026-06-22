@@ -1,0 +1,53 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+
+# Database (SQLite)
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Testing
+coverage/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Wrangler
+.wrangler/
+
+# Agents and skills
+.agent/
+.agents/
+skills-lock.json
+
+*.pdf
+
+# File Uploads
+uploads/
+uploads_test/
+
+# Test results
+test/results/

@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    command: ["migrate", "npm", "start"]
+    volumes:
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app
+
+  worker:
+    build: .
+    command: ["npm", "run", "worker"]
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - app
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    entrypoint: ["sqlite_web", "--host", "0.0.0.0", "--port", "8080", "/data/sqlite.db"]
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    networks:
+      - app
+
+  caddy:
+    # image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # - "80:80"
+      - "443:443"
+      - "443:443/udp"
+      - "4001:4001"
+      - "3001:3001"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./uploads:/app/uploads
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app:

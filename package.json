@@ -1,0 +1,81 @@
+{
+  "name": "gighunt",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "worker": "node src/worker.js",
+    "dev:test": "node --watch --env-file=.env.test src/index.js",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "test:ui": "npx vite preview --outDir test/results",
+    "lint": "npx oxlint",
+    "lint:fix": "npx oxlint --fix",
+    "typecheck": "tsc --noEmit ",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:test": "drizzle-kit migrate --config=drizzle.config-test.js",
+    "db:studio": "drizzle-kit studio --port 4002 --verbose",
+    "db:studio:test": "drizzle-kit studio --port 4000 --verbose --config=drizzle.config-test.js",
+    "db:seed": "node src/db/scripts/seed.js",
+    "db:seed:test": "node --env-file=.env.test src/db/scripts/seed.js",
+    "db:reset": "node src/db/scripts/reset.js",
+    "db:reset:test": "node --env-file=.env.test src/db/scripts/reset.js",
+    "db:fetch-all": "node src/db/scripts/fetch-all-gigs.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.4.3",
+    "@scalar/express-api-reference": "^0.9.3",
+    "better-auth": "^1.5.5",
+    "better-sqlite3": "^12.0.0",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "dotenv-expand": "^12.0.3",
+    "drizzle-orm": "^0.41.0",
+    "drizzle-seed": "^0.3.1",
+    "drizzle-zod": "^0.8.3",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.3.2",
+    "fuse.js": "^7.3.0",
+    "multer": "^2.1.1",
+    "node-cron": "^3.0.3",
+    "resend": "^6.12.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.5.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/supertest": "^7.2.0",
+    "@vitest/ui": "^4.1.0",
+    "drizzle-kit": "^0.31.4",
+    "husky": "^9.1.7",
+    "knip": "^5.87.0",
+    "lint-staged": "^16.3.2",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
+    "prettier": "^3.8.1",
+    "supertest": "^7.2.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "npm run lint:fix"
+    ]
+  }
+}

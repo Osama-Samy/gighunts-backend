@@ -1,0 +1,25 @@
+http://{$CADDY_HOST}:4001 {
+    basic_auth {
+        admin $2a$14$Hk.LCA0LTWl9rU8EciYuUO4kBvp3psk0J5xEvdQ8v3GLodjF8Bqnu
+    }
+    reverse_proxy sqlite-web:8080
+}
+
+gighunts.com {
+    tls {   
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+
+    handle /api/* {
+        reverse_proxy api:3001
+    }
+
+    handle /uploads/* {
+        root * /app
+        file_server
+    }
+
+    handle /* {
+        reverse_proxy gighunt-front:80
+    }
+}

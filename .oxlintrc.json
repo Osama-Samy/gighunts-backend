@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["jsdoc", "node", "import", "unicorn", "eslint", "promise"],
+  "categories": {},
+  "rules": {
+    "jsdoc/check-tag-names": [
+      "warn",
+      {
+        "definedTags": ["openapi", "swagger"],
+      },
+    ],
+    "unicorn/no-empty-file": "off",
+  },
+  "settings": {
+    "vitest": {
+      "typecheck": false,
+    },
+  },
+  "env": {
+    "builtin": true,
+  },
+  "globals": {},
+  "ignorePatterns": [],
+}
