@@ -3,7 +3,6 @@ services:
     container_name: backend-api-1
     build: .
     command: ["migrate", "npm", "start"]
-    # Ports can stay or be internal, caddy will proxy to 4050 directly
     ports:
       - "4050:4050"
     volumes:
@@ -37,19 +36,26 @@ services:
     networks:
       - app
 
-  # Adding the missing Caddy service that manages everything
+  # Caddy service custom built with cloudflare dns plugin
   caddy:
     container_name: backend-caddy
-    image: caddy:2-alpine
+    image: caddy-cloudflare:latest
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM caddy:2-alpine-builder AS builder
+        RUN xcaddy build --with github.com/caddy-dns/cloudflare
+        FROM caddy:2-alpine
+        COPY --from=builder /usr/bin/caddy /usr/bin/caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "5001:5001" # Your new database web UI port
+      - "5001:5001"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./data/caddy:/data
-      - ./uploads:/app/uploads # Shared to let caddy serve static uploads directly
+      - ./uploads:/app/uploads
     env_file:
       - .env
     networks:
@@ -57,4 +63,4 @@ services:
 
 networks:
   app:
-    name: backend_app # Force the network name to match what frontend expects
+    name: backend_app
