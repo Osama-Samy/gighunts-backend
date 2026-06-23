@@ -5,25 +5,10 @@ http://{$CADDY_HOST}:4001 {
     reverse_proxy backend-sqlite-web-1:8080
 }
 
-gighunts.com {
-    tls {   
-        dns cloudflare {$CLOUDFLARE_API_TOKEN}
-    }
-
-    handle /api/docs* {
-        basic_auth {
-            developer $2a$14$5yc3F6WoCw00vK16gqwiO.S5wMZ.TnFljjZXwHW7V/On8tYU4PSg6
-        }
-        reverse_proxy backend-api-1:4050 {
-            header_up Host {upstream_hostport}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-Proto https
-        }
-    }
-
+http://gighunts.com, http://www.gighunts.com {
     handle /docs* {
         basic_auth {
-            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
+            developer $2a$14$5yc3F6WoCw00vK16gqwiO.S5wMZ.TnFljjZXwHW7V/On8tYU4PSg6
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
