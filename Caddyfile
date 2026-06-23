@@ -1,24 +1,46 @@
-http://{$CADDY_HOST}:4001 {
+http://{$CADDY_HOST}:5001 {
     basic_auth {
-        admin $2a$14$Hk.LCA0LTWl9rU8EciYuUO4kBvp3psk0J5xEvdQ8v3GLodjF8Bqnu
+        # Username: admin | Password: osamapassdb500
+        admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
     }
-    reverse_proxy sqlite-web:8080
+    reverse_proxy backend-sqlite-web-1:8080
 }
 
-gighunts.com {
+gighunts.com, www.gighunts.com {
     tls {   
         dns cloudflare {$CLOUDFLARE_API_TOKEN}
     }
 
-    handle /api/* {
-        reverse_proxy api:3001
+    # 1. Secure API Documentation with Basic Auth
+    handle /api/docs* /docs* {
+        basic_auth {
+            # Username: developer | Password: osamapassdoc500
+            developer $2a$14$o0z9I6MhYl2vX8mXKp7TDe8f0g1h2i3j4k5l6m7n8o9p0q1r2s3t.
+        }
+        
+        reverse_proxy backend-api-1:4050 {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
     }
 
+    # 2. Forward regular API requests to the backend
+    handle /api/* {
+        reverse_proxy backend-api-1:4050 {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # 3. Serve uploaded files static directory
     handle /uploads/* {
         root * /app
         file_server
     }
 
+    # 4. Route all other traffic to the frontend container
     handle /* {
         reverse_proxy gighunt-front:80
     }
