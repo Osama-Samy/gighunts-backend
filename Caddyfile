@@ -6,17 +6,17 @@
     reverse_proxy backend-sqlite-web-1:8080
 }
 
-http://gighunts.com, http://www.gighunts.com {
+:80 {
     # 1a. Secure /api/docs with Basic Auth
     handle /api/docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
-            developer $2a$14$o0z9I6MhYl2vX8mXKp7TDe8f0g1h2i3j4k5l6m7n8o9p0q1r2s3t.
+            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto https
         }
     }
 
@@ -24,12 +24,12 @@ http://gighunts.com, http://www.gighunts.com {
     handle /docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
-            developer $2a$14$o0z9I6MhYl2vX8mXKp7TDe8f0g1h2i3j4k5l6m7n8o9p0q1r2s3t.
+            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto https
         }
     }
 
@@ -38,7 +38,7 @@ http://gighunts.com, http://www.gighunts.com {
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Proto https
         }
     }
 
@@ -50,6 +50,9 @@ http://gighunts.com, http://www.gighunts.com {
 
     # 4. Route all other traffic to the frontend container
     handle /* {
-        reverse_proxy gighunt-front:80
+        reverse_proxy gighunt-front:80 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto https
+        }
     }
 }
