@@ -1,4 +1,4 @@
-http://{$CADDY_HOST}:4001 {
+http://{$CADDY_HOST}:5001 {
     basic_auth {
         admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
     }
