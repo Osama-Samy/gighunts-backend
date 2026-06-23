@@ -1,6 +1,6 @@
 http://{$CADDY_HOST}:5001 {
     basic_auth {
-        admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
+        admin $2a$14$kyG75e5yrKy7xH/VBFRVg.RO4QmqgPhe.DwBBXRpNv3x2qYMzoEsa
     }
     reverse_proxy backend-sqlite-web-1:8080
 }
@@ -8,7 +8,7 @@ http://{$CADDY_HOST}:5001 {
 http://gighunts.com, http://www.gighunts.com {
     handle /docs* {
         basic_auth {
-            developer $2a$14$5yc3F6WoCw00vK16gqwiO.S5wMZ.TnFljjZXwHW7V/On8tYU4PSg6
+            developer $2a$14$nTClvOgLEwAVdNY7yzhv/.KSnhetjNDZeo6wQOEeV8NvYvLBVf0ai
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
