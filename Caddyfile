@@ -1,4 +1,4 @@
-http://{$CADDY_HOST}:5001 {
+:5001 {
     basic_auth {
         # Username: admin | Password: osamapassdb500
         admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
@@ -6,11 +6,7 @@ http://{$CADDY_HOST}:5001 {
     reverse_proxy backend-sqlite-web-1:8080
 }
 
-gighunts.com, www.gighunts.com {
-    tls {   
-        dns cloudflare {$CLOUDFLARE_API_TOKEN}
-    }
-
+http://gighunts.com, http://www.gighunts.com {
     # 1a. Secure /api/docs with Basic Auth
     handle /api/docs* {
         basic_auth {
