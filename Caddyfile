@@ -1,7 +1,7 @@
 :5001 {
     basic_auth {
         # Username: admin | Password: osamapassdb500
-        admin $$2a$$14$$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
+        admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
     }
     reverse_proxy backend-sqlite-web-1:8080
 }
@@ -11,7 +11,7 @@
     handle /api/docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
-            developer $$2a$$14$$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
+            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
@@ -24,7 +24,7 @@
     handle /docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
-            developer $$2a$$14$$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
+            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
