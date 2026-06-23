@@ -1,9 +1,9 @@
 :5001 {
     basic_auth {
         # Username: admin | Password: osamapassdb500
-        admin $2a$14$.K6SgHclgV9lHptbOWhFv.kIqGk2yQ3.g/5Y2A7DCH8E/K02SgMvG
+        admin $2a$14$aF.Sb6z8w4SyNFXxzvwkt.k5KWmlb21zrpmK0.RuQ1hZb3rvGuTv2
     }
-    reverse_proxy backend-sqlite-web-1:8080
+    reverse_proxy sqlite-web:8080
 }
 
 :80 {
@@ -11,9 +11,9 @@
     handle /api/docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
-            developer $2a$14$5yc3F6WoCw00vK16gqwiO.S5wMZ.TnFljjZXwHW7V/On8tYU4PSg6
+            developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
-        reverse_proxy backend-api-1:4050 {
+        reverse_proxy api:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
             header_up X-Forwarded-Proto https
@@ -26,7 +26,7 @@
             # Username: developer | Password: osamapassdoc500
             developer $2a$14$z5E.r7Y277h/QzN88f3Vp.4SleNfWhqI6ZJmQhMvSreSshYgM1p2i
         }
-        reverse_proxy backend-api-1:4050 {
+        reverse_proxy api:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
             header_up X-Forwarded-Proto https
@@ -35,7 +35,7 @@
 
     # 2. Forward regular API requests to the backend
     handle /api/* {
-        reverse_proxy backend-api-1:4050 {
+        reverse_proxy api:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
             header_up X-Forwarded-Proto https
