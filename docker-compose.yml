@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   api:
     container_name: backend-api-1
@@ -43,7 +45,7 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM caddy:2-alpine-builder AS builder
+        FROM caddy:builder AS builder
         RUN xcaddy build --with github.com/caddy-dns/cloudflare
         FROM caddy:2-alpine
         COPY --from=builder /usr/bin/caddy /usr/bin/caddy
