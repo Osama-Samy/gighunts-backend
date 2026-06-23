@@ -11,13 +11,25 @@ gighunts.com, www.gighunts.com {
         dns cloudflare {$CLOUDFLARE_API_TOKEN}
     }
 
-    # 1. Secure API Documentation with Basic Auth
-    handle /api/docs* /docs* {
+    # 1a. Secure /api/docs with Basic Auth
+    handle /api/docs* {
         basic_auth {
             # Username: developer | Password: osamapassdoc500
             developer $2a$14$o0z9I6MhYl2vX8mXKp7TDe8f0g1h2i3j4k5l6m7n8o9p0q1r2s3t.
         }
-        
+        reverse_proxy backend-api-1:4050 {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # 1b. Secure /docs with Basic Auth
+    handle /docs* {
+        basic_auth {
+            # Username: developer | Password: osamapassdoc500
+            developer $2a$14$o0z9I6MhYl2vX8mXKp7TDe8f0g1h2i3j4k5l6m7n8o9p0q1r2s3t.
+        }
         reverse_proxy backend-api-1:4050 {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
