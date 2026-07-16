@@ -475,6 +475,65 @@ Remove a skill from the authenticated user (preserves skill record in database).
 
 ---
 
+## Generate Proposal API
+
+### POST /api/users/me/generate-proposal
+
+Generate a professional job proposal using AI.
+
+The user provides the gig ID and preferred language. The backend automatically collects the current user's profile, CV, and gig details from the database, then sends them to the external AI service for proposal generation.
+
+**Authentication:** Required ✓
+
+**Body:**
+
+```json
+{
+  "gigId": 42,
+  "language": "ar"
+}
+```
+
+| Field      | Type   | Required | Description                                    |
+| ---------- | ------ | -------- | ---------------------------------------------- |
+| `gigId`    | number | Yes      | The ID of the gig to generate a proposal for   |
+| `language` | string | No       | Language for the proposal (`"en"`, `"ar"`, etc). Defaults to `"en"` |
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "proposal": "Dear Hiring Manager, I am excited to apply...",
+    "language": "en",
+    "platform": "freelancer",
+    "proposal_type": "restricted",
+    "metadata": {
+      "model": "gpt-4o",
+      "prompt_tokens": 512,
+      "completion_tokens": 384,
+      "latency_ms": 2100
+    },
+    "validation": {
+      "passed": true,
+      "confidence": 0.97,
+      "issues": []
+    }
+  }
+}
+```
+
+**Errors:**
+
+- `400 Bad Request` — No CV found. Please upload a CV before generating a proposal.
+- `400 Bad Request` — Gig with the specified ID not found.
+- `401 Unauthorized` — User is not authenticated.
+- `502 Bad Gateway` — AI service error (authentication, validation, rate limiting, or internal error).
+
+---
+
 ## Error Responses
 
 All errors follow this format:
@@ -497,3 +556,4 @@ All errors follow this format:
 | `NOT_FOUND`        | 404  | Resource not found (e.g., platform with `id` doesn't exist) |
 | `VALIDATION_ERROR` | 400  | Invalid request body or parameters                          |
 | `UNKNOWN_ERROR`    | 500  | Server error                                                |
+

@@ -4,12 +4,14 @@ import z from "zod";
 import { userInsertSchema, userSelectSchema } from "../../db/schema/auth.js";
 import { userCvsSelectSchema } from "../../db/schema/user-cvs.js";
 import { BaseResponse, baseResponseSchema } from "../../lib/baseResponse.js";
-import { UnauthorizedError, ValidationError } from "../../lib/errors.js";
+import { ApplicationError, UnauthorizedError, ValidationError } from "../../lib/errors.js";
 import { createRoute } from "../../lib/routeCreator.js";
 import { EmailChangeService } from "./email-change.service.js";
 import { PasswordResetService } from "./password-reset.service.js";
 import { UserService } from "./users.service.js";
 import { auth } from "../../lib/auth.js";
+import { GigsQueries } from "../gigs/gigs.queries.js";
+import { ProposalService } from "../../services/proposal.service.js";
 
 export const usersRouter = Router();
 export const basePath = "/users";
@@ -410,5 +412,103 @@ createRoute({
 
     const cvs = await UserService.getUserCvs(userId);
     return new BaseResponse(cvs);
+  },
+});
+
+// ── Generate Proposal (AI) ──────────────────────────────────────────────
+
+const generateProposalBodySchema = z.object({
+  gigId: z.coerce.number().int().positive(),
+  language: z.string().min(1).default("en"),
+});
+
+const proposalResponseDataSchema = z.object({
+  proposal: z.string(),
+  language: z.string(),
+  platform: z.string(),
+  proposal_type: z.string(),
+  metadata: z.object({
+    model: z.string(),
+    prompt_tokens: z.number(),
+    completion_tokens: z.number(),
+    latency_ms: z.number(),
+  }),
+  validation: z.object({
+    passed: z.boolean(),
+    confidence: z.number(),
+    issues: z.array(z.string()),
+  }),
+});
+
+createRoute({
+  basePath,
+  router: usersRouter,
+  method: "post",
+  path: "/me/generate-proposal",
+  bodySchema: generateProposalBodySchema,
+  responseSchema: baseResponseSchema.extend({
+    data: proposalResponseDataSchema,
+  }),
+  openapi: {
+    summary: "Generate a professional job proposal using AI",
+    tags: ["User"],
+    operationId: "generateProposal",
+    description:
+      "Generates a professional job proposal via the AI service. The user provides the gig ID and preferred language. The backend collects the current user's profile, CV, and gig details, then sends them to the AI service for proposal generation.",
+  },
+  handler: async ({ req, body }) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedError("No user id found", req.originalUrl);
+    }
+
+    // Fetch user data
+    const user = await UserService.getUserById(userId, req.originalUrl);
+
+    // Fetch user CVs and pick the first one
+    const cvs = await UserService.getUserCvs(userId);
+    if (!cvs || cvs.length === 0) {
+      throw new ValidationError(
+        "No CV found. Please upload a CV before generating a proposal.",
+        req.originalUrl,
+      );
+    }
+    const cv = cvs[0];
+
+    // Fetch gig data
+    const gig = await GigsQueries.findById(body.gigId, userId);
+    if (!gig) {
+      throw new ValidationError(
+        `Gig with id ${body.gigId} not found`,
+        req.originalUrl,
+      );
+    }
+
+    try {
+      const result = await ProposalService.generateProposal({
+        language: body.language,
+        user,
+        gig,
+        cv,
+        context: req.originalUrl,
+      });
+
+      return new BaseResponse(result);
+    } catch (error) {
+      if (error instanceof ApplicationError) throw error;
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to generate proposal";
+
+      throw new ApplicationError(
+        502,
+        message,
+        "https://example.com/probs/ai-service-error",
+        "AI Service Error",
+        req.originalUrl,
+      );
+    }
   },
 });
