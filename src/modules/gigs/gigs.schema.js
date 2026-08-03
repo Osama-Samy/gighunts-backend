@@ -9,6 +9,30 @@ export const gigQuerySchema = paginationSchema.extend({
   platformId: z.coerce.number().optional(),
   minPrice: z.coerce.number().optional(),
   maxPrice: z.coerce.number().optional(),
+  skillIds: z
+    .union([z.string(), z.array(z.number()), z.array(z.string())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      if (typeof val === "string") return val.split(",").map(Number);
+      return val.map(Number);
+    }),
+  matchLevels: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      if (typeof val === "string") return val.split(",");
+      return val;
+    }),
+  durations: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      if (typeof val === "string") return val.split(",");
+      return val;
+    }),
 });
 
 export const gigIdParamSchema = z.object({

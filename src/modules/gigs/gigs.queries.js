@@ -1,4 +1,4 @@
-import { and, asc, count, countDistinct, desc, eq, getTableColumns, gte, like, lte, sql } from "drizzle-orm";
+import { and, asc, count, countDistinct, desc, eq, getTableColumns, gte, like, lte, sql, inArray } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { gigSkills } from "../../db/schema/gig-skills.js";
 import { gigs } from "../../db/schema/gigs.js";
@@ -26,9 +26,11 @@ export const GigsQueries = {
    * @param {number} [params.type]
    * @param {number} [params.platformId]
    * @param {string} [params.userId]
+   * @param {number[]} [params.skillIds]
+   * @param {string[]} [params.durations]
    * @returns {Promise<{data: (GigSelect & {isBookmarked: unknown})[], total: number}>}
    */
-  async findAllPaginated({ page, limit, search, category, type, platformId, userId, minPrice, maxPrice }) {
+  async findAllPaginated({ page, limit, search, category, type, platformId, userId, minPrice, maxPrice, skillIds, durations }) {
     const offset = (page - 1) * limit;
 
     const filters = [];
@@ -38,6 +40,15 @@ export const GigsQueries = {
     if (platformId) filters.push(eq(gigs.platformId, platformId));
     if (minPrice !== undefined) filters.push(sql`(${gigs.price} >= ${minPrice} OR ${gigs.maxPrice} >= ${minPrice} OR ${gigs.minPrice} >= ${minPrice})`);
     if (maxPrice !== undefined) filters.push(sql`(${gigs.price} <= ${maxPrice} OR ${gigs.minPrice} <= ${maxPrice} OR ${gigs.maxPrice} <= ${maxPrice})`);
+    
+    if (skillIds && skillIds.length > 0) {
+      const skillsList = sql.join(skillIds.map(s => sql`${s}`), sql`, `);
+      filters.push(sql`EXISTS(SELECT 1 FROM ${gigSkills} WHERE ${gigSkills.gigId} = ${gigs.id} AND ${gigSkills.skillId} IN (${skillsList}))`);
+    }
+    
+    if (durations && durations.length > 0) {
+      filters.push(inArray(gigs.duration, durations));
+    }
 
     const where = filters.length > 0 ? and(...filters) : undefined;
 
@@ -76,9 +87,12 @@ export const GigsQueries = {
    * @param {string} [params.category]
    * @param {number} [params.type]
    * @param {number} [params.platformId]
+   * @param {number[]} [params.skillIds]
+   * @param {string[]} [params.matchLevels]
+   * @param {string[]} [params.durations]
    * @returns {Promise<{data: (GigSelect & {isBookmarked: boolean, matchedSkillsCount: number, matchPercentage: number})[], total: number}>}
    */
-  async findRecommendedPaginated({ page, limit, userId, search, category, type, platformId, minPrice, maxPrice }) {
+  async findRecommendedPaginated({ page, limit, userId, search, category, type, platformId, minPrice, maxPrice, skillIds, matchLevels, durations }) {
     const offset = (page - 1) * limit;
 
     // Subquery to get total skills per gig
@@ -98,6 +112,29 @@ export const GigsQueries = {
     if (platformId) filters.push(eq(gigs.platformId, platformId));
     if (minPrice !== undefined) filters.push(sql`(${gigs.price} >= ${minPrice} OR ${gigs.maxPrice} >= ${minPrice} OR ${gigs.minPrice} >= ${minPrice})`);
     if (maxPrice !== undefined) filters.push(sql`(${gigs.price} <= ${maxPrice} OR ${gigs.minPrice} <= ${maxPrice} OR ${gigs.maxPrice} <= ${maxPrice})`);
+    
+    if (skillIds && skillIds.length > 0) {
+      const skillsList = sql.join(skillIds.map(s => sql`${s}`), sql`, `);
+      filters.push(sql`EXISTS(SELECT 1 FROM ${gigSkills} WHERE ${gigSkills.gigId} = ${gigs.id} AND ${gigSkills.skillId} IN (${skillsList}))`);
+    }
+    
+    if (durations && durations.length > 0) {
+      filters.push(inArray(gigs.duration, durations));
+    }
+
+    let havingClause = undefined;
+    if (matchLevels && matchLevels.length > 0) {
+      const matchConditions = [];
+      const matchPercentageExpr = sql`(cast(count(${gigSkills.skillId}) as float) / ${totalSkillsPerGig.totalCount})`;
+      
+      if (matchLevels.includes('high')) matchConditions.push(sql`${matchPercentageExpr} >= 0.75`);
+      if (matchLevels.includes('medium')) matchConditions.push(sql`(${matchPercentageExpr} >= 0.5 AND ${matchPercentageExpr} < 0.75)`);
+      if (matchLevels.includes('low')) matchConditions.push(sql`${matchPercentageExpr} < 0.5`);
+      
+      if (matchConditions.length > 0) {
+        havingClause = sql`${sql.join(matchConditions, sql` OR `)}`;
+      }
+    }
 
     const query = db
       .select({
@@ -118,6 +155,7 @@ export const GigsQueries = {
       .innerJoin(totalSkillsPerGig, eq(gigs.id, totalSkillsPerGig.gigId))
       .where(and(...filters))
       .groupBy(gigs.id)
+      .having(havingClause)
       .orderBy(
         desc(gigs.creationTime),
         desc(count(gigSkills.skillId)),
@@ -127,11 +165,19 @@ export const GigsQueries = {
       .offset(offset);
 
     const countQuery = db
-      .select({ total: countDistinct(gigs.id) })
-      .from(gigs)
-      .innerJoin(gigSkills, eq(gigs.id, gigSkills.gigId))
-      .innerJoin(userSkills, eq(gigSkills.skillId, userSkills.skillId))
-      .where(and(...filters));
+      .select({ total: sql`count(*)` })
+      .from(
+        db
+          .select({ id: gigs.id })
+          .from(gigs)
+          .innerJoin(gigSkills, eq(gigs.id, gigSkills.gigId))
+          .innerJoin(userSkills, eq(gigSkills.skillId, userSkills.skillId))
+          .innerJoin(totalSkillsPerGig, eq(gigs.id, totalSkillsPerGig.gigId))
+          .where(and(...filters))
+          .groupBy(gigs.id)
+          .having(havingClause)
+          .as("subquery")
+      );
 
     const [data, [countResult]] = await Promise.all([query, countQuery]);
 
