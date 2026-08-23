@@ -5,7 +5,7 @@ import { auth } from "../../lib/auth.js";
 import { env } from "../../lib/env.js";
 import { db } from "../../db/index.js";
 import { user, account } from "../../db/schema/auth.js";
-import { ApplicationError, UnauthorizedError, ValidationError } from "../../lib/errors.js";
+import { UnauthorizedError, ValidationError } from "../../lib/errors.js";
 import { registry } from "../../lib/registry.js";
 import z from "zod";
 
