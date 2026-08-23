@@ -7,6 +7,7 @@ import { ApplicationError } from "./lib/errors.js";
 import { generateSpec, registry } from "./lib/registry.js";
 import { requestLogger } from "./middleware/logger.js";
 import { requireAuth } from "./middleware/requireAuth.js";
+import { mobileAuthRouter } from "./modules/auth/mobile.routes.js";
 import { gigsRouter } from "./modules/gigs/index.js";
 import { platformsRouter } from "./modules/platforms/index.js";
 import { skillsRouter } from "./modules/skills/index.js";
@@ -28,6 +29,9 @@ export async function createApp() {
   }));
 
   router.use(requestLogger);
+
+  // Custom Auth Routes (e.g. Mobile Google Login)
+  router.use("/auth", express.json(), mobileAuthRouter);
 
   // Configure Better Auth
   router.use("/auth", toNodeHandler(auth.handler));
