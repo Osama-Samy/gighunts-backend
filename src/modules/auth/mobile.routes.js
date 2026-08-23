@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { OAuth2Client } from "google-auth-library";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 import { auth } from "../../lib/auth.js";
@@ -11,8 +10,6 @@ import { registry } from "../../lib/registry.js";
 import z from "zod";
 
 export const mobileAuthRouter = Router();
-
-const client = new OAuth2Client(env.GOOGLE_OAUTH_CLIENT_ID);
 
 registry.registerPath({
   method: "post",
@@ -61,20 +58,21 @@ mobileAuthRouter.post("/mobile/google", async (req, res, next) => {
       throw new ValidationError("id_token is required");
     }
 
-    // 1. Verify id_token using google-auth-library
-    let ticket;
+    // 1. Verify id_token using Google's tokeninfo API
+    let payload;
     try {
-      ticket = await client.verifyIdToken({
-        idToken: id_token,
-        audience: env.GOOGLE_OAUTH_CLIENT_ID,
-      });
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`);
+      if (!response.ok) {
+        throw new UnauthorizedError("Invalid or expired id_token");
+      }
+      payload = await response.json();
+      
+      // Validate audience matches our Client ID
+      if (payload.aud !== env.GOOGLE_OAUTH_CLIENT_ID) {
+        throw new UnauthorizedError("Invalid token audience");
+      }
     } catch (error) {
       throw new UnauthorizedError("Invalid or expired id_token");
-    }
-
-    const payload = ticket.getPayload();
-    if (!payload) {
-      throw new UnauthorizedError("Invalid id_token payload");
     }
 
     const { sub: googleId, email, name, picture, email_verified } = payload;
