@@ -23,16 +23,7 @@ export function createAuth() {
     database: drizzleAdapter(db, {
       provider: "sqlite",
     }),
-    databaseHooks: {
-      session: {
-        create: {
-          after: async (session) => {
-            // Reactivate user if they were soft-deleted and successfully logged in again
-            await db.update(user).set({ isActive: true }).where(eq(user.id, session.userId));
-          }
-        }
-      }
-    },
+
     // emailVerification: {
     //   sendVerificationEmail: async ({ user, url, token }) => {
     //     await sendEmail({

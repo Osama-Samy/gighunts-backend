@@ -452,7 +452,7 @@ describe(`DELETE ${baseUrl}/me`, () => {
     expect(res.body.data).toEqual({ success: true });
   });
 
-  it("marks the user inactive in the database", async () => {
+  it("permanently deletes the user and associated data from the database", async () => {
     const { authApp, loggedInUser } = await createAuthApp();
 
     await authApp.delete(`${baseUrl}/me`).expect(200);
@@ -461,10 +461,7 @@ describe(`DELETE ${baseUrl}/me`, () => {
       .select()
       .from(user)
       .where(eq(user.id, loggedInUser.id));
-    if (!row) {
-      throw new Error("soft deleted user not in database");
-    }
-    expect(row.isActive).toBe(false);
+    expect(row).toBeUndefined();
   });
 
   it("returns 401 when unauthenticated", async () => {

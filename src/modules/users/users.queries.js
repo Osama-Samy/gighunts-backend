@@ -77,16 +77,22 @@ export const UsersQueries = {
   },
 
   /**
-   * Set user inactive
+   * Delete user permanently
+   * @param {string} id - user id
+   * @returns {Promise<number>} the number of affected rows
+   */
+  async deleteUser(id) {
+    const result = await db.delete(user).where(eq(user.id, id));
+    return result.changes;
+  },
+
+  /**
+   * Set user inactive / delete user
    * @param {string} id - user id
    * @returns {Promise<number>} the number of affected rows
    */
   async setUserInactive(id) {
-    const result = await db
-      .update(user)
-      .set({ isActive: false })
-      .where(eq(user.id, id));
-    return result.changes;
+    return this.deleteUser(id);
   },
 
   /**

@@ -57,17 +57,27 @@ export const UserService = {
   },
 
   /**
+   * Delete user permanently
+   * @param {string} userId - user id
+   * @param {string} [context] - error context
+   * @returns {Promise<number>} the number of affected rows
+   */
+  async deleteUser(userId, context) {
+    const result = await UsersQueries.deleteUser(userId);
+    if (result === 0) {
+      throw new NotFoundError("User not found", context);
+    }
+    return result;
+  },
+
+  /**
    * Set user inactive
    * @param {string} userId - user id
    * @param {string} [context] - error context
    * @returns {Promise<number>} the number of affected rows
    */
   async setUserInactive(userId, context) {
-    const result = await UsersQueries.setUserInactive(userId);
-    if (result === 0) {
-      throw new NotFoundError("User not found", context);
-    }
-    return result;
+    return this.deleteUser(userId, context);
   },
 
   /**

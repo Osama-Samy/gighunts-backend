@@ -372,10 +372,10 @@ createRoute({
     }),
   }),
   openapi: {
-    summary: "Soft delete current user",
+    summary: "Delete current user",
     tags: ["User"],
     operationId: "deleteCurrentUser",
-    description: "Soft deletes the currently authenticated user",
+    description: "Permanently deletes the currently authenticated user and all associated data",
   },
   handler: async ({ req }) => {
     const userId = req.user?.id;
@@ -383,7 +383,7 @@ createRoute({
       throw new UnauthorizedError("No user id found", req.originalUrl);
     }
 
-    await UserService.setUserInactive(userId, req.originalUrl);
+    await UserService.deleteUser(userId, req.originalUrl);
 
     return new BaseResponse({ success: true });
   },

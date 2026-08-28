@@ -105,11 +105,8 @@ mobileAuthRouter.post("/mobile/google", async (req, res, next) => {
         providerId: "google",
         userId: userId,
       });
-    } else {
-      // Reactivate user if they were soft-deleted
       if (!existingUser.isActive) {
-        await db.update(user).set({ isActive: true }).where(eq(user.id, existingUser.id));
-        existingUser.isActive = true;
+        throw new UnauthorizedError("User account is inactive");
       }
 
       // Check if account is already linked
