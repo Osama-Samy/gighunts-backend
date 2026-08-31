@@ -24,7 +24,7 @@ export function createAuth() {
       provider: "sqlite",
     }),
     rateLimit: {
-      enabled: true,
+      storage: "memory",
       window: 60,
       max: 30,
     },
