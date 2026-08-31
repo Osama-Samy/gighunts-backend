@@ -1,5 +1,4 @@
-const AI_PROPOSAL_URL = "http://91.99.199.47:8002/api/v1/generate-proposal";
-const AI_API_KEY = "1234";
+import { env } from "../lib/env.js";
 
 /**
  * @typedef {Object} ProposalRequest
@@ -74,11 +73,11 @@ export const ProposalService = {
       },
     };
 
-    const response = await fetch(AI_PROPOSAL_URL, {
+    const response = await fetch(env.AI_PROPOSAL_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": AI_API_KEY,
+        "X-API-Key": env.AI_PROPOSAL_API_KEY,
       },
       body: JSON.stringify(payload),
     });

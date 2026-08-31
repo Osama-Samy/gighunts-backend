@@ -39,11 +39,15 @@ export function buildMulter(uploadConfig) {
         cb(null, dest);
       },
       filename: (_req, file, cb) => {
+        // Sanitize originalname: strip path traversal sequences and unsafe characters
+        const sanitized = file.originalname
+          .replace(/\.\.[/\\]/g, "")
+          .replace(/[^a-zA-Z0-9._-]/g, "_");
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + file.originalname);
+        cb(null, uniqueSuffix + "-" + sanitized);
       },
     }),
-    limits: { fileSize: fileSizeLimit },
+    limits: { fileSize: fileSizeLimit, files: 10 },
     fileFilter(_req, file, cb) {
       if (!allowedMimeTypes || allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);

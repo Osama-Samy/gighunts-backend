@@ -28,6 +28,8 @@ const EnvSchema = z.object({
   MAIL_FROM: z.string().optional(),
   UPLOADS_DIR: z.string().default("uploads"),
   AI_CV_ANALYZE_URL: z.string().default("http://91.99.199.47:8001/analyze"),
+  AI_PROPOSAL_URL: z.string().default("http://91.99.199.47:8002/api/v1/generate-proposal"),
+  AI_PROPOSAL_API_KEY: z.string().default(""),
   SCRAPER_URL: z.string(),
   BASE_URL: z.string().default("http://localhost:3001"),
   FRONT_END_URL: z.string().default("http://localhost:4321")

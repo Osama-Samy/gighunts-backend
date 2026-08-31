@@ -105,11 +105,13 @@ mobileAuthRouter.post("/mobile/google", async (req, res, next) => {
         providerId: "google",
         userId: userId,
       });
+    } else {
+      // Existing user — verify active status
       if (!existingUser.isActive) {
         throw new UnauthorizedError("User account is inactive");
       }
 
-      // Check if account is already linked
+      // Link Google account if not already linked
       const existingAccount = await db.query.account.findFirst({
         where: and(
           eq(account.accountId, googleId),
@@ -118,7 +120,6 @@ mobileAuthRouter.post("/mobile/google", async (req, res, next) => {
       });
 
       if (!existingAccount) {
-        // Link the Google account to the existing user
         await db.insert(account).values({
           id: crypto.randomUUID(),
           accountId: googleId,
