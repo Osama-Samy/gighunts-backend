@@ -31,3 +31,10 @@ jobs:
             docker compose up -d --remove-orphans
 
             docker image prune -f
+
+            echo "=== Waiting 10s for containers to start ==="
+            sleep 10
+            echo "=== API Container Logs ==="
+            docker logs backend-api-1 --tail 80
+            echo "=== Worker Container Logs ==="
+            docker logs backend-worker-1 --tail 30
