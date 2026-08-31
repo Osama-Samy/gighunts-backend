@@ -5,7 +5,7 @@ import { logs } from "../db/schema/logs.js";
  * @param {import("../types.js").LogData} logData
  */
 export const logToDb = ({
-  db,
+  db: customDb,
   level = "info",
   message,
   context,
@@ -14,6 +14,7 @@ export const logToDb = ({
   query,
   data,
 }) => {
+  const targetDb = customDb || db;
   const logColor = {
     info: "\x1b[36m", // Cyan
     warn: "\x1b[33m", // Yellow
@@ -38,7 +39,7 @@ export const logToDb = ({
     ...(data ? { data } : {}),
   };
 
-  db.insert(logs)
+  targetDb.insert(logs)
     .values(insertData)
     .execute()
     .catch((/** @type {Error} */ err) => {
