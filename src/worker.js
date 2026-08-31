@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { schedule } from "node-cron";
+import cron from "node-cron";
 import { lte } from "drizzle-orm";
 import { db } from "./db/index.js";
 import { logs } from "./db/schema/logs.js";
@@ -8,7 +8,7 @@ import { runScraperJob } from "./lib/scraper.js";
 console.log("[Worker] Background worker started.");
 
 // Setup Scheduled Task (cron) to flush old logs every 10 days
-schedule("0 0 */10 * *", async () => {
+cron.schedule("0 0 */10 * *", async () => {
   const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
   try {
     console.log("[Worker] Flushing old logs...");
@@ -20,7 +20,7 @@ schedule("0 0 */10 * *", async () => {
 });
 
 // Setup Scheduled Task (cron) to scrape gigs every 6 hours
-schedule("0 */6 * * *", () => {
+cron.schedule("0 */6 * * *", () => {
   console.log("[Worker] Starting scheduled scraper job...");
   runScraperJob().catch(console.error);
 });

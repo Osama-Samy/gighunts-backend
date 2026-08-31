@@ -23,15 +23,7 @@ export function createAuth() {
     database: drizzleAdapter(db, {
       provider: "sqlite",
     }),
-    rateLimit: {
-      storage: "memory",
-      window: 60,
-      max: 30,
-    },
-    session: {
-      expiresIn: 60 * 60 * 24 * 7, // 7 days
-      updateAge: 60 * 60 * 24, // refresh session every 24 hours
-    },
+
 
     // emailVerification: {
     //   sendVerificationEmail: async ({ user, url, token }) => {
