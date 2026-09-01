@@ -27,6 +27,7 @@ export const user = sqliteTable("user", {
   platformFilters: text("platform_filters", { mode: "json" }).default(JSON.stringify([])),
   phone: text("phone"),
   cvLink: text("cv_link"),
+  isOnboarded: integer("is_onboarded", { mode: "boolean" }).default(false),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),

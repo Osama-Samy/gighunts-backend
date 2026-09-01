@@ -76,6 +76,7 @@ export function createAuth() {
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [env.FRONT_END_URL],
+    defaultSuccessUrl: "/welcome",
     ...(env.NODE_ENV === "dev" ? {
       advanced:
       {
@@ -144,6 +145,11 @@ const userAdditionalFields = {
   cvLink: {
     type: "string",
     fieldName: "cv_link",
+  },
+  isOnboarded: {
+    type: "boolean",
+    default: false,
+    fieldName: "is_onboarded",
   },
 };
 
